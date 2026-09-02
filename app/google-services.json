@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "48071730568",
+    "project_id": "instant-mechanic-3baac",
+    "storage_bucket": "instant-mechanic-3baac.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:48071730568:android:4a38b63fb478dfaccdc63d",
+        "android_client_info": {
+          "package_name": "com.app.instantmechanic"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBehu-RuQu3oyIrrFYuQLTHDF9VIhnriy8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
