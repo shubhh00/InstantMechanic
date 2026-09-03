@@ -84,7 +84,11 @@ fun MechanicDetailsScreen(
             )
 
             Text(
-                text = "(${mechanic.reviewCount} reviews)",
+                text = if (mechanic.reviewCount == 0) {
+                    "No reviews"
+                } else {
+                    "(${mechanic.reviewCount} reviews)"
+                },
                 color = Color(0xFF746A63)
             )
 
@@ -135,7 +139,9 @@ fun MechanicDetailsScreen(
             title = "Address"
         ) {
             Text(
-                text = mechanic.address,
+                text = mechanic.address.ifBlank {
+                    "Address unavailable"
+                },
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.SemiBold,
                 color = Color(0xFF1C1917)
@@ -150,7 +156,8 @@ fun MechanicDetailsScreen(
             title = "Working hours"
         ) {
             Text(
-                text = "${formatTimeTo12Hour(mechanic.openTime)} - ${formatTimeTo12Hour(mechanic.closeTime)}",                style = MaterialTheme.typography.bodyLarge,
+                text = "${formatTimeTo12Hour(mechanic.openTime)} - ${formatTimeTo12Hour(mechanic.closeTime)}",
+                style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.SemiBold,
                 color = Color(0xFF1C1917)
             )
@@ -164,10 +171,16 @@ fun MechanicDetailsScreen(
             title = "Phone number"
         ) {
             Text(
-                text = mechanic.phoneNumber,
+                text = mechanic.phoneNumber.ifBlank {
+                    "Phone number unavailable"
+                },
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.SemiBold,
-                color = Color(0xFFFF6B0B)
+                color = if (mechanic.phoneNumber.isBlank()) {
+                    Color(0xFF746A63)
+                } else {
+                    Color(0xFFFF6B0B)
+                }
             )
         }
 
@@ -178,29 +191,39 @@ fun MechanicDetailsScreen(
         DetailSection(
             title = "Services"
         ) {
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                mechanic.services.forEach { service ->
-                    Surface(
-                        shape = RoundedCornerShape(10.dp),
-                        color = Color(0xFFFFF4EB),
-                        border = BorderStroke(
-                            1.dp,
-                            Color(0xFFFFA768)
-                        )
-                    ) {
-                        Text(
-                            text = service,
-                            modifier = Modifier.padding(
-                                horizontal = 12.dp,
-                                vertical = 7.dp
-                            ),
-                            color = Color(0xFF5A3420),
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                    }
+            if (mechanic.services.isEmpty()) {
+                Text(
+                    text = "No services listed",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFF746A63)
+                )
+            } else {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    mechanic.services
+                        .sortedBy { it.lowercase() }
+                        .forEach { service ->
+                            Surface(
+                                shape = RoundedCornerShape(10.dp),
+                                color = Color(0xFFFFF4EB),
+                                border = BorderStroke(
+                                    1.dp,
+                                    Color(0xFFFFA768)
+                                )
+                            ) {
+                                Text(
+                                    text = service,
+                                    modifier = Modifier.padding(
+                                        horizontal = 12.dp,
+                                        vertical = 7.dp
+                                    ),
+                                    color = Color(0xFF5A3420),
+                                    style = MaterialTheme.typography.labelMedium
+                                )
+                            }
+                        }
                 }
             }
         }

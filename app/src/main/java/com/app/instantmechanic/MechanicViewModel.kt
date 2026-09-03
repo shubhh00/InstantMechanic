@@ -1,6 +1,5 @@
 package com.app.instantmechanic
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.domain.model.Mechanic
@@ -11,33 +10,52 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+sealed interface MechanicUiState {
+    data object Loading : MechanicUiState
+    data class Success(val mechanics: List<Mechanic>) : MechanicUiState
+    data class Error(val message: String) : MechanicUiState
+}
 
 @HiltViewModel
 class MechanicViewModel @Inject constructor(
     private val repository: MechanicRepository
 ) : ViewModel() {
 
-    private val _mechanics = MutableStateFlow<List<Mechanic>>(emptyList())
-    val mechanics: StateFlow<List<Mechanic>> = _mechanics
+    private val _uiState =
+        MutableStateFlow<MechanicUiState>(MechanicUiState.Loading)
+
+    val uiState: StateFlow<MechanicUiState> = _uiState
 
     init {
         loadMechanics()
     }
 
-    private fun loadMechanics() {
+    fun loadMechanics() {
         viewModelScope.launch {
-            try {
-                val result = repository.getMechanics()
-                _mechanics.value = result
+            _uiState.value = MechanicUiState.Loading
 
-                Log.d("MechanicViewModel", "Mechanics: $result")
+            try {
+                val mechanics = repository.getMechanics()
+
+                _uiState.value = MechanicUiState.Success(
+                    mechanics.sortedBy { it.distanceKm }
+                )
+
             } catch (e: Exception) {
-                Log.e("MechanicViewModel", "Failed to load mechanics", e)
+                _uiState.value = MechanicUiState.Error(
+                    "Unable to load mechanics. Please check your internet connection."
+                )
             }
         }
     }
 
     fun getMechanicById(id: String): Mechanic? {
-        return mechanics.value.find { it.id == id }
+        val state = _uiState.value
+
+        return if (state is MechanicUiState.Success) {
+            state.mechanics.find { it.id == id }
+        } else {
+            null
+        }
     }
 }
