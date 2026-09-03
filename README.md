@@ -94,5 +94,3 @@ Minimum SDK: Android 8.0 (API 26)
 - Distance is currently provided by the backend and mechanics are displayed nearest-first.
 - Live GPS-based distance calculation is outside the current assignment scope.
 - Missing optional fields are handled gracefully in the UI.
-- Pagination
-- Push notifications for service-request updates
