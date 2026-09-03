@@ -36,4 +36,8 @@ class MechanicViewModel @Inject constructor(
             }
         }
     }
+
+    fun getMechanicById(id: String): Mechanic? {
+        return mechanics.value.find { it.id == id }
+    }
 }

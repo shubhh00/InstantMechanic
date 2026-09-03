@@ -1,7 +1,9 @@
 package com.app.instantmechanic.di
 
-import com.app.data.MechanicRepositoryImpl
+import com.app.data.mechanic.MechanicRepositoryImpl
+import com.app.data.serviceRequest.ServiceRequestRepositoryImpl
 import com.app.domain.repository.MechanicRepository
+import com.app.domain.repository.ServiceRequestRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -17,4 +19,11 @@ abstract class MechanicModule {
     abstract fun bindMechanicRepository(
         impl: MechanicRepositoryImpl
     ): MechanicRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindServiceRequestRepository(
+        impl: ServiceRequestRepositoryImpl
+    ): ServiceRequestRepository
+
 }

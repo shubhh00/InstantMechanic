@@ -68,4 +68,5 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.viewmodel.compose)
+    implementation("androidx.compose.material:material-icons-extended")
 }
