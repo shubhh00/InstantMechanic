@@ -1,32 +1,61 @@
 package com.app.instantmechanic.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.app.domain.model.Mechanic
+import com.app.instantmechanic.ServiceRequestUiState
 
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun RequestServiceScreen(
     mechanic: Mechanic,
+    uiState: ServiceRequestUiState,
     onBack: () -> Unit,
     onSubmit: (
-        customerName: String,
-        phoneNumber: String,
-        vehicleNumber: String,
-        selectedService: String,
-        problemDescription: String
-    ) -> Unit
+        String,
+        String,
+        String,
+        String,
+        String
+    ) -> Unit,
+    onSuccessDismiss: () -> Unit,
+    onErrorDismiss: () -> Unit
 ) {
     var customerName by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
@@ -38,7 +67,8 @@ fun RequestServiceScreen(
     var showErrors by remember { mutableStateOf(false) }
 
     val isPhoneValid =
-        phoneNumber.length == 10 && phoneNumber.all { it.isDigit() }
+        phoneNumber.length == 10 &&
+                phoneNumber.all { it.isDigit() }
 
     val isFormValid =
         customerName.isNotBlank() &&
@@ -47,51 +77,83 @@ fun RequestServiceScreen(
                 selectedService.isNotBlank() &&
                 problemDescription.isNotBlank()
 
+    val textFieldColors = OutlinedTextFieldDefaults.colors(
+        focusedBorderColor = Color(0xFFFF6B0B),
+        focusedLabelColor = Color(0xFFFF6B0B),
+        cursorColor = Color(0xFFFF6B0B),
+
+        unfocusedBorderColor = Color(0xFFD9CEC5),
+        unfocusedLabelColor = Color(0xFF746A63),
+
+        focusedTextColor = Color(0xFF1C1917),
+        unfocusedTextColor = Color(0xFF1C1917),
+
+        errorBorderColor = Color(0xFFC62828),
+        errorLabelColor = Color(0xFFC62828)
+    )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFFFFBF3))
+            .imePadding()
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
 
         TextButton(
-            onClick = onBack
+            onClick = onBack,
+            contentPadding = PaddingValues(0.dp)
         ) {
-            Text("← Back")
+            Text(
+                text = "← Back",
+                color = Color(0xFFFF6B0B)
+            )
         }
 
-        Text(
-            text = "Request Service",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF171717)
-        )
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = "Request Service",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF1C1917)
+            )
 
-        Text(
-            text = mechanic.name,
-            style = MaterialTheme.typography.bodyMedium,
-            color = Color(0xFF6B625C)
+            Text(
+                text = mechanic.name,
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color(0xFF746A63)
+            )
+        }
+
+        Spacer(
+            modifier = Modifier.height(2.dp)
         )
 
         OutlinedTextField(
             value = customerName,
-            onValueChange = { customerName = it },
+            onValueChange = {
+                customerName = it
+            },
             modifier = Modifier.fillMaxWidth(),
             label = {
                 Text("Customer name")
             },
             singleLine = true,
-            isError = showErrors && customerName.isBlank()
+            isError = showErrors && customerName.isBlank(),
+            colors = textFieldColors,
+            shape = RoundedCornerShape(12.dp)
         )
 
         OutlinedTextField(
             value = phoneNumber,
-            onValueChange = {
-                if (it.length <= 10) {
-                    phoneNumber = it.filter(Char::isDigit)
-                }
+            onValueChange = { input ->
+                phoneNumber = input
+                    .filter(Char::isDigit)
+                    .take(10)
             },
             modifier = Modifier.fillMaxWidth(),
             label = {
@@ -104,9 +166,13 @@ fun RequestServiceScreen(
             isError = showErrors && !isPhoneValid,
             supportingText = {
                 if (showErrors && !isPhoneValid) {
-                    Text("Enter a valid 10-digit phone number")
+                    Text(
+                        text = "Enter a valid 10-digit phone number"
+                    )
                 }
-            }
+            },
+            colors = textFieldColors,
+            shape = RoundedCornerShape(12.dp)
         )
 
         OutlinedTextField(
@@ -119,52 +185,65 @@ fun RequestServiceScreen(
                 Text("Vehicle number")
             },
             singleLine = true,
-            isError = showErrors && vehicleNumber.isBlank()
+            isError = showErrors && vehicleNumber.isBlank(),
+            colors = textFieldColors,
+            shape = RoundedCornerShape(12.dp)
         )
 
-        Box(
-            modifier = Modifier.fillMaxWidth()
+        ExposedDropdownMenuBox(
+            expanded = serviceMenuExpanded,
+            onExpandedChange = {
+                serviceMenuExpanded = !serviceMenuExpanded
+            },
         ) {
             OutlinedTextField(
                 value = selectedService,
                 onValueChange = {},
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor(),
                 label = {
-                    Text("Select service")
+                    Text("Service needed")
                 },
                 readOnly = true,
                 trailingIcon = {
-                    IconButton(
-                        onClick = {
-                            serviceMenuExpanded = true
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowDropDown,
-                            contentDescription = "Select service"
-                        )
-                    }
+                    ExposedDropdownMenuDefaults.TrailingIcon(
+                        expanded = serviceMenuExpanded
+                    )
                 },
-                isError = showErrors && selectedService.isBlank()
+                isError = showErrors && selectedService.isBlank(),
+                colors = textFieldColors,
+                shape = RoundedCornerShape(12.dp)
             )
 
-            DropdownMenu(
+            ExposedDropdownMenu(
                 expanded = serviceMenuExpanded,
                 onDismissRequest = {
                     serviceMenuExpanded = false
                 }
             ) {
-                mechanic.services.forEach { service ->
-                    DropdownMenuItem(
-                        text = {
-                            Text(service)
-                        },
-                        onClick = {
-                            selectedService = service
-                            serviceMenuExpanded = false
-                        }
-                    )
-                }
+                mechanic.services
+                    .sortedBy { it.lowercase() }
+                    .forEach { service ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = service,
+                                    color = Color(0xFF1C1917)
+                                )
+                            },
+                            onClick = {
+                                selectedService = service
+                                serviceMenuExpanded = false
+                            },
+                            colors = MenuDefaults.itemColors(
+                                textColor = Color(0xFF1C1917)
+                            ),
+                            modifier = Modifier.background(
+                                Color(0xFFFFFBF3)
+                            )
+                        )
+                    }
             }
         }
 
@@ -180,14 +259,23 @@ fun RequestServiceScreen(
                 Text("Problem description")
             },
             minLines = 4,
-            isError = showErrors && problemDescription.isBlank()
+            isError = showErrors && problemDescription.isBlank(),
+            colors = textFieldColors,
+            shape = RoundedCornerShape(12.dp)
+        )
+
+        Spacer(
+            modifier = Modifier.height(4.dp)
         )
 
         Button(
             onClick = {
                 showErrors = true
 
-                if (isFormValid) {
+                if (
+                    isFormValid &&
+                    uiState !is ServiceRequestUiState.Loading
+                ) {
                     onSubmit(
                         customerName,
                         phoneNumber,
@@ -197,18 +285,89 @@ fun RequestServiceScreen(
                     )
                 }
             },
+            enabled = uiState !is ServiceRequestUiState.Loading,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp),
+            shape = RoundedCornerShape(14.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFFF6B0B)
+                containerColor = Color(0xFFFF6B0B),
+                contentColor = Color.White,
+                disabledContainerColor = Color(0xFFFFB27A)
             )
         ) {
-            Text(
-                text = "Submit Request",
-                color = Color.White,
-                fontWeight = FontWeight.SemiBold
-            )
+            if (uiState is ServiceRequestUiState.Loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(22.dp),
+                    strokeWidth = 2.dp,
+                    color = Color.White
+                )
+            } else {
+                Text(
+                    text = "Submit Request",
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
+    }
+
+    if (uiState is ServiceRequestUiState.Success) {
+        AlertDialog(
+            onDismissRequest = {},
+            containerColor = Color(0xFFFFFBF3),
+            title = {
+                Text(
+                    text = "Request submitted",
+                    color = Color(0xFF1C1917),
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    text = "Your service request has been submitted successfully.",
+                    color = Color(0xFF746A63)
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = onSuccessDismiss
+                ) {
+                    Text(
+                        text = "Done",
+                        color = Color(0xFFFF6B0B)
+                    )
+                }
+            }
+        )
+    }
+
+    if (uiState is ServiceRequestUiState.Error) {
+        AlertDialog(
+            onDismissRequest = onErrorDismiss,
+            containerColor = Color(0xFFFFFBF3),
+            title = {
+                Text(
+                    text = "Submission failed",
+                    color = Color(0xFF1C1917),
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    text = uiState.message,
+                    color = Color(0xFF746A63)
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = onErrorDismiss
+                ) {
+                    Text(
+                        text = "OK",
+                        color = Color(0xFFFF6B0B)
+                    )
+                }
+            }
+        )
     }
 }

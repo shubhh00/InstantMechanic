@@ -15,6 +15,7 @@ class MechanicRepositoryImpl @Inject constructor(
             .mapNotNull { (id, dto) ->
                 dto.toDomain(id)
             }
+            .sortedBy { it.distanceKm }
     }
 
     override suspend fun getMechanic(id: String): Mechanic? {

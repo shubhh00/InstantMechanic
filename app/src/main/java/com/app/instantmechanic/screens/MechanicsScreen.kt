@@ -41,25 +41,26 @@ fun MechanicScreen(
 
         item {
             Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+
                 Text(
-                    text = "Instant Mechanic",
-                    style = MaterialTheme.typography.headlineSmall,
+                    text = "Mechanics near you",
+                    style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF171717)
+                    color = Color(0xFF1C1917)
                 )
 
                 Text(
-                    text = "Find trusted garages around you",
+                    text = "Nearby trusted garages, ready when you are",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFF6B625C)
+                    color = Color(0xFF746A63)
+                )
+
+                Spacer(
+                    modifier = Modifier.height(8.dp)
                 )
             }
-
-            Spacer(
-                modifier = Modifier.height(8.dp)
-            )
         }
 
         items(
