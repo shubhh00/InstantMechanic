@@ -1,7 +1,7 @@
 package com.app.data.api
 
 
-import com.app.data.MechanicDto
+import com.app.data.mechanic.MechanicDto
 import retrofit2.http.GET
 
 interface MechanicApi {

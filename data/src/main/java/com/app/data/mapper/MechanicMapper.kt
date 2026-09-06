@@ -1,14 +1,15 @@
 package com.app.data.mapper
 
-import com.app.data.MechanicDto
+import com.app.data.local.mechanic.MechanicEntity
+import com.app.data.mechanic.MechanicDto
 import com.app.domain.model.Mechanic
 
-fun MechanicDto.toDomain(id: String): Mechanic? {
-    val name = name ?: return null
+fun MechanicDto.toEntity(id: String): MechanicEntity? {
+    val mechanicName = name ?: return null
 
-    return Mechanic(
+    return MechanicEntity(
         id = id,
-        name = name,
+        name = mechanicName,
         rating = rating ?: 0.0,
         reviewCount = reviewCount ?: 0,
         distanceKm = distanceKm ?: 0.0,
@@ -18,5 +19,21 @@ fun MechanicDto.toDomain(id: String): Mechanic? {
         openTime = openTime.orEmpty(),
         closeTime = closeTime.orEmpty(),
         phoneNumber = phone.orEmpty()
+    )
+}
+
+fun MechanicEntity.toDomain(): Mechanic {
+    return Mechanic(
+        id = id,
+        name = name,
+        rating = rating,
+        reviewCount = reviewCount,
+        distanceKm = distanceKm,
+        location = location,
+        address = address,
+        services = services,
+        openTime = openTime,
+        closeTime = closeTime,
+        phoneNumber = phoneNumber
     )
 }

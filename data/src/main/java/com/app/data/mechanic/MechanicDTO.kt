@@ -1,4 +1,4 @@
-package com.app.data
+package com.app.data.mechanic
 
 data class MechanicDto(
     val name: String? = null,

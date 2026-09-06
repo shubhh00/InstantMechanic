@@ -1,6 +1,5 @@
 package com.app.data.mechanic
 
-import com.app.data.MechanicDto
 import com.app.data.api.MechanicApi
 import javax.inject.Inject
 

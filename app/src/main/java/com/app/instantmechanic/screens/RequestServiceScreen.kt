@@ -311,31 +311,32 @@ fun RequestServiceScreen(
         }
     }
 
-    if (uiState is ServiceRequestUiState.Success) {
+    val successState = uiState as? ServiceRequestUiState.Success
+
+    if (successState != null) {
         AlertDialog(
-            onDismissRequest = {},
-            containerColor = Color(0xFFFFFBF3),
+            onDismissRequest = onSuccessDismiss,
             title = {
                 Text(
-                    text = "Request submitted",
-                    color = Color(0xFF1C1917),
-                    fontWeight = FontWeight.Bold
+                    text = if (successState.queuedForSync) {
+                        "Request saved"
+                    } else {
+                        "Request submitted"
+                    }
                 )
             },
             text = {
                 Text(
-                    text = "Your service request has been submitted successfully.",
-                    color = Color(0xFF746A63)
+                    text = if (successState.queuedForSync) {
+                        "You're offline. Your request is saved and will be sent automatically when you're back online."
+                    } else {
+                        "Your service request has been submitted successfully."
+                    }
                 )
             },
             confirmButton = {
-                TextButton(
-                    onClick = onSuccessDismiss
-                ) {
-                    Text(
-                        text = "Done",
-                        color = Color(0xFFFF6B0B)
-                    )
+                Button(onClick = onSuccessDismiss) {
+                    Text("OK")
                 }
             }
         )

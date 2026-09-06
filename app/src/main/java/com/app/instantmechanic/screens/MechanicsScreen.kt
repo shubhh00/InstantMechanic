@@ -5,16 +5,19 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -22,7 +25,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.app.instantmechanic.MechanicUiState
 import com.app.instantmechanic.MechanicViewModel
 
 @Composable
@@ -31,56 +33,22 @@ fun MechanicScreen(
     viewModel: MechanicViewModel,
     onMechanicClick: (String) -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val state by viewModel.uiState.collectAsState()
 
-    when (val state = uiState) {
-
-        MechanicUiState.Loading -> {
-            Box(
-                modifier = modifier
-                    .fillMaxSize()
-                    .background(Color(0xFFFFFBF3)),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    color = Color(0xFFFF6B0B)
-                )
-            }
+    when {
+        state.isInitialLoading && state.mechanics.isEmpty() -> {
+            InitialLoadingContent(modifier)
         }
 
-        is MechanicUiState.Error -> {
-            Column(
-                modifier = modifier
-                    .fillMaxSize()
-                    .background(Color(0xFFFFFBF3))
-                    .padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-
-                Text(
-                    text = state.message,
-                    color = Color(0xFF746A63)
-                )
-
-                Spacer(
-                    modifier = Modifier.height(16.dp)
-                )
-
-                Button(
-                    onClick = {
-                        viewModel.loadMechanics()
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFFF6B0B)
-                    )
-                ) {
-                    Text("Retry")
-                }
-            }
+        state.errorMessage != null && state.mechanics.isEmpty() -> {
+            InitialErrorContent(
+                modifier = modifier,
+                message = state.errorMessage.orEmpty(),
+                onRetry = viewModel::refreshMechanics
+            )
         }
 
-        is MechanicUiState.Success -> {
+        else -> {
             LazyColumn(
                 modifier = modifier
                     .fillMaxSize()
@@ -91,18 +59,43 @@ fun MechanicScreen(
                 ),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-
                 item {
                     MechanicHomeHeader(
                         modifier = Modifier.padding(bottom = 6.dp)
                     )
                 }
 
+                if (state.isRefreshing) {
+                    item {
+                        LinearProgressIndicator(
+                            modifier = Modifier.fillMaxWidth(),
+                            color = Color(0xFFFF6B0B)
+                        )
+                    }
+                }
+
+                state.errorMessage?.let { message ->
+                    item {
+                        OfflineBanner(
+                            message = message,
+                            onRetry = viewModel::refreshMechanics
+                        )
+                    }
+                }
+
+                if (state.mechanics.isEmpty()) {
+                    item {
+                        Text(
+                            text = "No mechanics are currently available.",
+                            color = Color(0xFF746A63)
+                        )
+                    }
+                }
+
                 items(
                     items = state.mechanics,
-                    key = { it.id }
+                    key = { mechanic -> mechanic.id }
                 ) { mechanic ->
-
                     MechanicCard(
                         mechanic = mechanic,
                         onClick = {
@@ -110,6 +103,82 @@ fun MechanicScreen(
                         }
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun InitialLoadingContent(
+    modifier: Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color(0xFFFFFBF3)),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator(
+            color = Color(0xFFFF6B0B)
+        )
+    }
+}
+
+@Composable
+private fun InitialErrorContent(
+    modifier: Modifier,
+    message: String,
+    onRetry: () -> Unit
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color(0xFFFFFBF3))
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = message,
+            color = Color(0xFF746A63)
+        )
+
+        Button(
+            onClick = onRetry,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFFFF6B0B)
+            )
+        ) {
+            Text("Retry")
+        }
+    }
+}
+
+@Composable
+private fun OfflineBanner(
+    message: String,
+    onRetry: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        color = Color(0xFFFFF0E6)
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp)
+        ) {
+            Text(
+                text = message,
+                color = Color(0xFF746A63)
+            )
+
+            TextButton(
+                onClick = onRetry
+            ) {
+                Text(
+                    text = "Try again",
+                    color = Color(0xFFFF6B0B)
+                )
             }
         }
     }

@@ -8,10 +8,13 @@ class ServiceRequestRemoteDataSource @Inject constructor(
     private val database: FirebaseDatabase
 ) {
 
-    suspend fun submitRequest(request: ServiceRequestDto) {
+    suspend fun submitRequest(
+        requestId: String,
+        request: ServiceRequestDto
+    ) {
         database
             .getReference("serviceRequests")
-            .push()
+            .child(requestId)
             .setValue(request)
             .await()
     }

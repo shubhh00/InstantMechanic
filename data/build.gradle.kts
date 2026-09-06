@@ -23,6 +23,11 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
+    //stores room exported database
+    ksp {
+        arg("room.schemaLocation", "$projectDir/schemas")
+    }
+
 }
 
 dependencies {
@@ -31,7 +36,6 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.firebase.database)
     implementation(libs.material)
-    testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
 
@@ -40,4 +44,12 @@ dependencies {
 
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
+
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

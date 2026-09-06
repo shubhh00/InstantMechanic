@@ -5,57 +5,97 @@ import androidx.lifecycle.viewModelScope
 import com.app.domain.model.Mechanic
 import com.app.domain.repository.MechanicRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-sealed interface MechanicUiState {
-    data object Loading : MechanicUiState
-    data class Success(val mechanics: List<Mechanic>) : MechanicUiState
-    data class Error(val message: String) : MechanicUiState
-}
+data class MechanicUiState(
+    val mechanics: List<Mechanic> = emptyList(),
+    val isInitialLoading: Boolean = true,
+    val isRefreshing: Boolean = false,
+    val errorMessage: String? = null
+)
 
 @HiltViewModel
 class MechanicViewModel @Inject constructor(
     private val repository: MechanicRepository
 ) : ViewModel() {
 
-    private val _uiState =
-        MutableStateFlow<MechanicUiState>(MechanicUiState.Loading)
+    private val _uiState = MutableStateFlow(MechanicUiState())
 
-    val uiState: StateFlow<MechanicUiState> = _uiState
+    val uiState: StateFlow<MechanicUiState> =        _uiState.asStateFlow()
 
     init {
-        loadMechanics()
+        observeCachedMechanics()
+        refreshMechanics()
     }
 
-    fun loadMechanics() {
+    private fun observeCachedMechanics() {
         viewModelScope.launch {
-            _uiState.value = MechanicUiState.Loading
+            repository.observeMechanics().collect { mechanics ->
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        mechanics = mechanics,
+                        isInitialLoading = if (mechanics.isNotEmpty()) {
+                            false
+                        } else {
+                            currentState.isInitialLoading
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    fun  refreshMechanics() {
+        viewModelScope.launch {
+            val hasCachedData = _uiState.value.mechanics.isNotEmpty()
+
+            _uiState.update {
+                it.copy(
+                    isInitialLoading = !hasCachedData,
+                    isRefreshing = hasCachedData,
+                    errorMessage = null
+                )
+            }
 
             try {
-                val mechanics = repository.getMechanics()
+                repository.refreshMechanics()
 
-                _uiState.value = MechanicUiState.Success(
-                    mechanics.sortedBy { it.distanceKm }
-                )
-
-            } catch (e: Exception) {
-                _uiState.value = MechanicUiState.Error(
-                    "Unable to load mechanics. Please check your internet connection."
-                )
+                _uiState.update {
+                    it.copy(
+                        isInitialLoading = false,
+                        isRefreshing = false,
+                        errorMessage = null
+                    )
+                }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        isInitialLoading = false,
+                        isRefreshing = false,
+                        errorMessage = if (
+                            currentState.mechanics.isEmpty()
+                        ) {
+                            "Unable to load mechanics. Check your internet connection."
+                        } else {
+                            "You're offline. Showing saved mechanics."
+                        }
+                    )
+                }
             }
         }
     }
 
     fun getMechanicById(id: String): Mechanic? {
-        val state = _uiState.value
-
-        return if (state is MechanicUiState.Success) {
-            state.mechanics.find { it.id == id }
-        } else {
-            null
+        return _uiState.value.mechanics.find { mechanic ->
+            mechanic.id == id
         }
     }
 }
