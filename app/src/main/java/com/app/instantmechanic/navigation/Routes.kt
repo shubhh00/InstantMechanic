@@ -5,4 +5,5 @@ object Routes {
     const val DETAILS = "details/{mechanicId}"
     const val REQUEST = "request/{mechanicId}"
     const val SPLASH = "splash"
+    const val VIDEO_CONSULTATION = "video-consultation"
 }

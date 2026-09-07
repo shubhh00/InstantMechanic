@@ -1,5 +1,6 @@
 package com.app.instantmechanic.screens
 
+import androidx.activity.compose.ReportDrawnWhen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,9 +32,14 @@ import com.app.instantmechanic.MechanicViewModel
 fun MechanicScreen(
     modifier: Modifier = Modifier,
     viewModel: MechanicViewModel,
-    onMechanicClick: (String) -> Unit
+    onMechanicClick: (String) -> Unit,
+    onVideoConsultationClick: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
+
+    ReportDrawnWhen {
+        !state.isInitialLoading
+    }
 
     when {
         state.isInitialLoading && state.mechanics.isEmpty() -> {
@@ -64,7 +70,12 @@ fun MechanicScreen(
                         modifier = Modifier.padding(bottom = 6.dp)
                     )
                 }
-
+                item {
+                    VideoConsultationCard(
+                        onStartConsultation =
+                            onVideoConsultationClick
+                    )
+                }
                 if (state.isRefreshing) {
                     item {
                         LinearProgressIndicator(

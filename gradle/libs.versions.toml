@@ -24,6 +24,7 @@ room = "2.8.4"
 workManager = "2.11.2"
 mockk = "1.14.11"
 coroutines = "1.10.2"
+agoraRtc = "4.6.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -63,12 +64,13 @@ androidx-hilt-compiler = { group = "androidx.hilt", name = "hilt-compiler", vers
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 
+agora-rtc = { group = "io.agora.rtc", name = "lite-sdk", version.ref = "agoraRtc" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
 android-library = { id = "com.android.library", version.ref = "agp" }
-
 
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

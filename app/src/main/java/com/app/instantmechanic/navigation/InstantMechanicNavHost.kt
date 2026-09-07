@@ -14,13 +14,13 @@ import com.app.instantmechanic.screens.MechanicDetailsScreen
 import com.app.instantmechanic.screens.MechanicScreen
 import com.app.instantmechanic.screens.RequestServiceScreen
 import com.app.instantmechanic.screens.SplashScreen
+import com.app.instantmechanic.video.VideoCallViewModel
+import com.app.instantmechanic.video.VideoConsultationScreen
 
 @Composable
 fun InstantMechanicNavHost() {
     val navController = rememberNavController()
     val mechanicViewModel: MechanicViewModel = hiltViewModel()
-    val serviceRequestViewModel: ServiceRequestViewModel = hiltViewModel()
-    val uiState by serviceRequestViewModel.uiState.collectAsState()
 
     NavHost(
         navController = navController,
@@ -44,10 +44,27 @@ fun InstantMechanicNavHost() {
                 viewModel = mechanicViewModel,
                 onMechanicClick = { mechanicId ->
                     navController.navigate("details/$mechanicId")
+                },
+                onVideoConsultationClick = {
+                    navController.navigate(
+                        Routes.VIDEO_CONSULTATION
+                    ) {
+                        launchSingleTop = true
+                    }
                 }
             )
         }
 
+        composable(Routes.VIDEO_CONSULTATION) {
+            val videoCallViewModel: VideoCallViewModel = hiltViewModel()
+
+            VideoConsultationScreen(
+                viewModel = videoCallViewModel,
+                onCallFinished = {
+                    navController.popBackStack()
+                }
+            )
+        }
         composable(Routes.DETAILS) { backStackEntry ->
             val mechanicId =
                 backStackEntry.arguments
@@ -67,6 +84,8 @@ fun InstantMechanicNavHost() {
         }
 
         composable(Routes.REQUEST) { backStackEntry ->
+            val serviceRequestViewModel: ServiceRequestViewModel = hiltViewModel()
+            val uiState by serviceRequestViewModel.uiState.collectAsState()
 
             val mechanicId = backStackEntry.arguments
                 ?.getString("mechanicId")

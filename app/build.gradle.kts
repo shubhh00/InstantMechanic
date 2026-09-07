@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -6,6 +8,20 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
 }
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use {
+            load(it)
+        }
+    }
+}
+val agoraAppId = localProperties.getProperty("AGORA_APP_ID").orEmpty()
+
+val agoraRtcUid = localProperties.getProperty("AGORA_RTC_UID").orEmpty().toIntOrNull() ?: 1001
+
+val agoraTempToken = localProperties.getProperty("AGORA_TEMP_TOKEN").orEmpty()
 
 android {
     namespace = "com.app.instantmechanic"
@@ -23,12 +39,28 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField(
+            "String",
+            "AGORA_APP_ID",
+            "\"$agoraAppId\""
+        )
+        buildConfigField(
+            "int",
+            "AGORA_RTC_UID",
+            agoraRtcUid.toString()
+        )
+        buildConfigField(
+            "String",
+            "AGORA_TEMP_TOKEN",
+            "\"$agoraTempToken\""
+        )
     }
 
     buildTypes {
         release {
             optimization {
-                enable = false
+                enable = true
             }
         }
     }
@@ -38,6 +70,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -73,4 +106,6 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.hilt.work)
     ksp(libs.androidx.hilt.compiler)
+
+    implementation(libs.agora.rtc)
 }
