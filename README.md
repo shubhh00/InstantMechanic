@@ -2,9 +2,9 @@
 
 # Instant Mechanic
 
-**Find nearby garages, book a service, and talk to a mechanic on video — even with no network.**
+**Discover nearby garages, queue service requests offline, and connect with a mechanic over live video.**
 
-An offline-first Android app built to explore production concerns: durable local data, background sync, real-time communication, modular architecture, and measurable performance work.
+An offline-first Android app built to explore production concerns: durable local data, background sync, real-time communication, modular architecture, and measurable performance.
 
 <br>
 
@@ -28,10 +28,24 @@ An offline-first Android app built to explore production concerns: durable local
 
 ### At a glance
 
-| 📦 APK size | ⚡ Cold start | 🧱 Architecture | 📴 Offline |
+| 📦 APK size | ⚡ Time to full display | 🧱 Architecture | 📴 Offline support |
 |:---:|:---:|:---:|:---:|
-| **155 MB → 69 MB** | **3,701 ms → 3,423 ms** | **3 Gradle modules** | **Full browse + submit** |
-| 55.5% smaller | 7.5% faster to full display | Android-free domain layer | Queued, auto-retried |
+| **155 MB → 69 MB** | **3,701 ms → 3,423 ms** | **3 Gradle modules** | **Browse + submit** |
+| 55.5% smaller | 7.5% faster | Android-free domain | Queued and auto-retried |
+
+</div>
+
+---
+
+## Demo
+
+<div align="center">
+
+<!-- Replace DEMO_VIDEO_URL with the GitHub-hosted video URL -->
+
+https://github.com/user-attachments/assets/03c49695-fc52-4c10-b7e9-887d6479d9ce
+
+<sub>Search and filtering, offline service requests, and Agora video consultation.</sub>
 
 </div>
 
@@ -43,13 +57,20 @@ An offline-first Android app built to explore production concerns: durable local
 
 | Home | Mechanic details | Service request |
 |:---:|:---:|:---:|
-| <img src="https://github.com/user-attachments/assets/cc343028-6385-407e-8714-d72c2cb1294d" width="230" alt="Home screen" /> | <img src="https://github.com/user-attachments/assets/e4311c50-b660-42fd-b830-a1972a540a61" width="230" alt="Mechanic details" /> | <img src="https://github.com/user-attachments/assets/8cb11ccc-d9ce-4c30-97cf-e22ad123193f" width="230" alt="Service request form" /> |
-| Mechanics ordered by distance | Ratings, hours, and live open/closed status | Validated request form |
+| <img src="https://github.com/user-attachments/assets/bd95158a-a548-4aaa-a864-f977e805aa81" width="230" alt="Home screen" /> | <img src="https://github.com/user-attachments/assets/4ef2859c-6956-4e29-a9f8-b50272541209" width="230" alt="Mechanic details" /> | <img src="https://github.com/user-attachments/assets/8cb11ccc-d9ce-4c30-97cf-e22ad123193f" width="230" alt="Service request form" /> |
+| Nearby garages and consultation | Ratings, hours, status, and services | Validated request form |
 
-| Success | Network error | Missing data |
+| Success | Offline state | Missing data |
 |:---:|:---:|:---:|
-| <img src="https://github.com/user-attachments/assets/62ea3c91-6552-447e-9242-0ba4a3ca835c" width="230" alt="Request success confirmation" /> | <img src="https://github.com/user-attachments/assets/95e39a4b-0ffd-4042-b530-a7ce074d178a" width="230" alt="Network error state" /> | <img src="https://github.com/user-attachments/assets/61d206e6-aac3-47e6-ade4-95f1d6d05ee2" width="230" alt="Graceful missing-data handling" /> |
-| Confirmation after submission | Cached data survives a failed refresh | Graceful degradation on partial records |
+| <img src="https://github.com/user-attachments/assets/62ea3c91-6552-447e-9242-0ba4a3ca835c" width="230" alt="Request success confirmation" /> | <img src="https://github.com/user-attachments/assets/95e39a4b-0ffd-4042-b530-a7ce074d178a" width="230" alt="Offline cached-data state" /> | <img src="https://github.com/user-attachments/assets/61d206e6-aac3-47e6-ade4-95f1d6d05ee2" width="230" alt="Graceful missing-data handling" /> |
+| Submission confirmation | Cached data survives failed refresh | Graceful handling of partial records |
+
+<!-- Replace the three URLs below after uploading the screenshots to GitHub -->
+
+| Search and filters | Video preview | Live consultation |
+|:---:|:---:|:---:|
+| <img src="https://github.com/user-attachments/assets/fce993a3-dc69-4651-a7f5-f84aa2c0b541" width="230" alt="Mechanic search and filters" /> | <img src="https://github.com/user-attachments/assets/96d90fb3-9445-4075-9daa-15e02d6bd332" width="230" alt="Video consultation preview" /> | <img src="https://github.com/user-attachments/assets/2aedbc89-3565-4879-8dcc-bd5369b369bd" width="230" alt="Live Agora video consultation" /> |
+| Search by garage or service | Preview your camera before joining | Video and audio call controls |
 
 </div>
 
@@ -57,49 +78,66 @@ An offline-first Android app built to explore production concerns: durable local
 
 ## Features
 
-**Discovery**
-- Browse mechanics ordered by distance
-- Ratings, reviews, address, working hours, services, and calculated open/closed status
-- Cached listings remain browsable with no network connection
+### 🔎 Garage discovery
 
-**Service requests**
-- Submit requests online or offline
+- Search mechanics by garage name or offered service
+- Switch between **Nearby** and **Open Now**
+- Mechanics ordered using backend-provided distance
+- Pull to refresh while retaining cached data
+- Service chips with category-specific icons
+- Dynamically calculated open and closed status
+
+### 📴 Offline-first experience
+
+- Room database acts as the local source of truth
+- Cached mechanic listings remain available without connectivity
+- Network refreshes update the local cache
+- Existing content stays visible when a refresh fails
+
+### 🔧 Service requests
+
+- Submit service requests while online or offline
+- Requests are saved locally before remote submission
 - Pending requests retry automatically when connectivity returns
-- Form input validation
+- Sync status is retained in Room
+- Form validation and clear success or error states
 
-**Video consultation**
-- One-to-one call with camera, microphone, camera-switching, and call controls
+### 📹 Video consultation
 
-**State handling**
-- Loading, refresh, offline, empty, success, and error states throughout
+- One-to-one video consultation powered by Agora RTC
+- Local camera preview and remote participant rendering
+- Microphone and camera controls
+- Front and rear camera switching
+- Join, leave, error, and remote-user lifecycle handling
 
 ---
 
 ## Architecture
 
-MVVM and Clean Architecture across three Gradle modules:
+The app follows MVVM and Clean Architecture across three Gradle modules:
 
 | Module | Responsibility |
 |:---|:---|
-| **`app`** | Compose UI, navigation, ViewModels, DI, Agora integration, WorkManager workers |
-| **`data`** | Room, Firebase, Retrofit, DTOs, mappers, data sources, repository implementations |
+| **`app`** | Compose UI, navigation, ViewModels, dependency injection, Agora integration, and WorkManager workers |
+| **`data`** | Room, Firebase, Retrofit, DTOs, mappers, data sources, and repository implementations |
 | **`domain`** | Platform-independent models and repository contracts |
 
 > [!NOTE]
-> The `domain` module has **no dependency** on Android, Room, Retrofit, Firebase, or Compose — it compiles as pure Kotlin.
+> The `domain` module has no dependency on Android, Room, Retrofit, Firebase, or Jetpack Compose.
 
 ```mermaid
 flowchart TD
-    UI["🖥️ Compose UI"] --> VM["🔄 ViewModels · StateFlow"]
-    VM --> Contracts["📄 Domain repository contracts"]
-    Contracts --> Repositories["🗂️ Data repositories"]
-    Repositories --> Room[("💾 Room database")]
-    Repositories --> Remote["☁️ Firebase remote data"]
-    Worker["⏱️ WorkManager sync"] --> Repositories
+    UI["Compose UI"] --> VM["ViewModels and StateFlow"]
+    VM --> Contracts["Domain repository contracts"]
+    Contracts --> Repositories["Data repositories"]
+    Repositories --> Room[("Room database")]
+    Repositories --> Remote["Firebase remote data"]
+    Worker["WorkManager sync"] --> Repositories
 
     classDef ui fill:#4285F4,stroke:#1a1a1a,color:#fff
     classDef domain fill:#7F52FF,stroke:#1a1a1a,color:#fff
     classDef data fill:#FF6F00,stroke:#1a1a1a,color:#fff
+
     class UI,VM ui
     class Contracts domain
     class Repositories,Room,Remote,Worker data
@@ -109,47 +147,58 @@ flowchart TD
 
 ## Offline-first behavior
 
-**Mechanic listings.** Room is the local source of truth. The UI observes database changes as a `Flow`, while a refresh fetches the latest Firebase data through Retrofit and updates the cache. Cached mechanics remain available when the refresh fails.
+### Mechanic listings
 
-**Service requests.** A request is saved locally before remote submission is attempted. Failed or timed-out requests stay queued with their sync status, and a network-constrained WorkManager job retries them once connectivity is available.
+Room is the local source of truth. The UI observes database changes as a `Flow`, while network refreshes fetch the latest mechanic data from Firebase through Retrofit and update the cache.
+
+If a refresh fails, previously cached mechanics remain visible and the UI communicates that saved data is being displayed.
+
+### Service requests
+
+A service request is stored locally before remote submission is attempted. Failed requests remain queued with their current sync status.
+
+A network-constrained WorkManager job retries pending requests when connectivity becomes available.
 
 ---
 
 ## Video consultation
 
-Agora RTC powers the consultation flow:
+Agora RTC powers the video consultation flow:
 
-- Local camera preview and remote participant rendering
-- Microphone and camera toggles, front/rear switching
-- Join, leave, error, and remote-user lifecycle events
+- Local camera preview
+- Remote participant video rendering
+- Microphone and camera toggles
+- Front and rear camera switching
+- Remote-user join and leave events
+- Error-state handling
 - RTC engine cleanup when the call ViewModel is cleared
 
 > [!WARNING]
-> The project uses a fixed demonstration channel and a temporary Agora token. A production implementation would issue tokens from a secure backend and add mechanic matching/signaling.
+> The current implementation uses a fixed demonstration channel and temporary Agora token. A production version would generate tokens through a secure backend and include mechanic discovery, availability, and call signaling.
 
 ---
 
 ## Performance
 
-### APK size
+### APK size reduction
 
-| Configuration | APK size |
+| Configuration | Release APK size |
 |:---|---:|
-| Full Agora SDK, no release optimization | 155 MB |
-| **R8 + Agora Lite SDK** | **69 MB** |
+| Full Agora SDK without release optimization | 155 MB |
+| **Agora Lite SDK with R8** | **69 MB** |
 
-**≈55.5% smaller**, via R8 shrinking and migration from the full Agora package to the Lite SDK.
+The release APK was reduced by approximately **55.5%** by migrating from the full Agora package to the Lite SDK and enabling R8 code and resource shrinking.
 
-### Startup
+### Startup optimization
 
-Compared against an eager-initialization build that opened Room synchronously and initialized Agora, WorkManager, and service-request dependencies during application launch.
+Startup was compared against a deliberately eager implementation that opened Room synchronously and initialized Firebase, Agora, WorkManager-related dependencies, and service-request dependencies during application launch.
 
 | Implementation | Median time to full display |
 |:---|---:|
 | Eager initialization | 3,701 ms |
 | **Deferred initialization** | **3,423 ms** |
 
-**≈278 ms (7.5%) faster** at the median.
+Deferred feature initialization improved median time to full display by approximately **278 ms**, or **7.5%**.
 
 <details>
 <summary><b>Measurement methodology</b></summary>
@@ -157,12 +206,14 @@ Compared against an eager-initialization build that opened Room synchronously an
 <br>
 
 - 10 process-cold launches per implementation
-- Same physical Android device and persisted app data
-- Same debug build configuration and branded splash duration
-- Launched through ADB using `am start -S`
-- Meaningful UI completion reported with Compose `ReportDrawnWhen`
+- Same physical Android device
+- Same persisted application data
+- Same debug build configuration
+- Same branded splash-screen duration
+- App launched through ADB using `am start -S`
+- Meaningful UI completion reported using Compose `ReportDrawnWhen`
 
-Absolute timings are device- and build-dependent; the percentage represents the controlled comparison on the test device.
+Absolute startup timings depend on the device and build configuration. The percentage represents the controlled comparison performed on the same test device.
 
 </details>
 
@@ -170,18 +221,18 @@ Absolute timings are device- and build-dependent; the percentage represents the 
 
 ## Tech stack
 
-| Layer | Technologies |
+| Area | Technologies |
 |:---|:---|
 | **Language** | Kotlin, Coroutines |
-| **UI** | Jetpack Compose, Navigation Compose |
+| **UI** | Jetpack Compose, Material Design, Navigation Compose |
 | **Architecture** | MVVM, Clean Architecture, StateFlow |
-| **DI** | Hilt with KSP |
+| **Dependency injection** | Hilt with KSP |
 | **Persistence** | Room |
-| **Background** | WorkManager |
-| **Network** | Retrofit, Gson, Firebase Realtime Database |
-| **Real-time** | Agora RTC |
+| **Background work** | WorkManager |
+| **Networking** | Retrofit, Gson, Firebase Realtime Database |
+| **Real-time communication** | Agora RTC |
 | **Testing** | JUnit, MockK, kotlinx-coroutines-test |
-| **Build** | R8 |
+| **Build optimization** | R8, Agora Lite SDK |
 
 ---
 
@@ -191,8 +242,10 @@ Unit tests cover:
 
 - Mechanic DTO-to-domain mapping
 - Service-request entity and DTO mapping
-- Repository submission and synchronization outcomes
-- Online success, offline queuing, and retry behavior
+- Repository submission outcomes
+- Successful online submission
+- Offline request queuing
+- Pending-request synchronization and retry behavior
 
 ---
 
@@ -217,9 +270,13 @@ Unit tests cover:
 
 **1.** Clone the repository and open it in Android Studio.
 
-**2.** Add your Firebase `google-services.json` file under `app/`.
+```bash
+git clone https://github.com/shubhh00/InstantMechanic.git
+```
 
-**3.** Add the following to the root `local.properties`:
+**2.** Add your Firebase `google-services.json` file under the `app/` directory.
+
+**3.** Add the following values to the root `local.properties` file:
 
 ```properties
 AGORA_APP_ID=your_agora_app_id
@@ -227,9 +284,10 @@ AGORA_RTC_UID=1001
 AGORA_TEMP_TOKEN=your_temporary_token
 ```
 
-**4.** Sync Gradle and run the `app` configuration on an emulator or physical device.
+**4.** Sync Gradle and run the `app` configuration on an emulator or physical Android device.
 
-> `local.properties` must not be committed. Agora temporary tokens expire and should be replaced by server-generated tokens before production use.
+> [!IMPORTANT]
+> `local.properties` must not be committed. Agora temporary tokens expire and should be replaced with server-generated tokens in a production application.
 
 </details>
 
@@ -237,14 +295,17 @@ AGORA_TEMP_TOKEN=your_temporary_token
 
 ## Current limitations
 
-| Area | Status |
+| Area | Current implementation |
 |:---|:---|
-| **Distance** | Supplied by the backend rather than calculated from live GPS |
-| **Video** | Shared demonstration channel without production signaling or mechanic assignment |
-| **Credentials** | Firebase and Agora configured for development, not a deployed production backend |
+| **Nearby sorting** | Uses distance values supplied by Firebase rather than live device GPS |
+| **Video matching** | Uses a shared demonstration channel without mechanic assignment or production signaling |
+| **Agora authentication** | Uses a temporary development token rather than tokens issued by a secure backend |
+| **Backend** | Firebase is configured as a development data source rather than a production deployment |
 
 ---
 
 <div align="center">
-<sub>Built to explore production Android concerns end to end — architecture, offline resilience, and measurable performance.</sub>
+
+<sub>Built to explore production Android concerns end to end: modular architecture, offline resilience, real-time communication, and measurable performance.</sub>
+
 </div>
