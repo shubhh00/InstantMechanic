@@ -127,24 +127,9 @@ fun MechanicCard(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 mechanic.services.sorted().forEach { service ->
-                    Surface(
-                        shape = RoundedCornerShape(10.dp),
-                        color = Color(0xFFFFF4EB),
-                        border = BorderStroke(
-                            1.dp,
-                            Color(0xFFFFA768)
-                        )
-                    ) {
-                        Text(
-                            text = service,
-                            modifier = Modifier.padding(
-                                horizontal = 12.dp,
-                                vertical = 7.dp
-                            ),
-                            color = Color(0xFF5A3420),
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                    }
+                    ServiceChip(
+                        service = service
+                    )
                 }
             }
         }

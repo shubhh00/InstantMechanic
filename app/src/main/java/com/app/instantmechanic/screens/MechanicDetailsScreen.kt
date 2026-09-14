@@ -1,6 +1,5 @@
 package com.app.instantmechanic.screens
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -205,24 +204,9 @@ fun MechanicDetailsScreen(
                     mechanic.services
                         .sortedBy { it.lowercase() }
                         .forEach { service ->
-                            Surface(
-                                shape = RoundedCornerShape(10.dp),
-                                color = Color(0xFFFFF4EB),
-                                border = BorderStroke(
-                                    1.dp,
-                                    Color(0xFFFFA768)
-                                )
-                            ) {
-                                Text(
-                                    text = service,
-                                    modifier = Modifier.padding(
-                                        horizontal = 12.dp,
-                                        vertical = 7.dp
-                                    ),
-                                    color = Color(0xFF5A3420),
-                                    style = MaterialTheme.typography.labelMedium
-                                )
-                            }
+                            ServiceChip(
+                                service = service
+                            )
                         }
                 }
             }
