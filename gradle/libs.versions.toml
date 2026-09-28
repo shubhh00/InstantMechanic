@@ -16,7 +16,6 @@ firebaseDatabase = "22.0.1"
 appcompat = "1.6.1"
 material = "1.10.0"
 
-
 hilt = "2.60"
 ksp = "2.2.10-2.0.2"
 androidxHilt = "1.4.0"
@@ -25,6 +24,8 @@ workManager = "2.11.2"
 mockk = "1.14.11"
 coroutines = "1.10.2"
 agoraRtc = "4.6.3"
+firebaseBom = "34.19.0"
+crashlyticsPlugin = "3.0.8"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -66,11 +67,18 @@ kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 
 agora-rtc = { group = "io.agora.rtc", name = "lite-sdk", version.ref = "agoraRtc" }
 
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
+firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
+firebase-config = { group = "com.google.firebase", name = "firebase-config" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
 android-library = { id = "com.android.library", version.ref = "agp" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlyticsPlugin" }
 
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

@@ -2,6 +2,7 @@ package com.app.instantmechanic.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -12,12 +13,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,10 +38,20 @@ fun MechanicDetailsScreen(
     onBack: () -> Unit,
     onRequestService: () -> Unit
 ) {
-    val mechanic = viewModel.getMechanicById(mechanicId)
+    val uiState by viewModel.uiState.collectAsState()
+    val mechanic = uiState.mechanics.find { it.id == mechanicId }
 
     if (mechanic == null) {
-        Text("Mechanic not found")
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            if (uiState.isInitialLoading || uiState.isRefreshing) {
+                CircularProgressIndicator(color = Color(0xFFFF6B0B))
+            } else {
+                Text("Mechanic not found")
+            }
+        }
         return
     }
 

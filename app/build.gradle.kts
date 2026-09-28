@@ -7,6 +7,8 @@ plugins {
 
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+
+    alias(libs.plugins.firebase.crashlytics)
 }
 val localProperties = Properties().apply {
     val localPropertiesFile = rootProject.file("local.properties")
@@ -108,4 +110,10 @@ dependencies {
     ksp(libs.androidx.hilt.compiler)
 
     implementation(libs.agora.rtc)
+
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.config)
+    implementation(libs.firebase.messaging)
 }

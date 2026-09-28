@@ -1,5 +1,6 @@
 package com.app.instantmechanic.navigation
 
+import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -16,11 +17,28 @@ import com.app.instantmechanic.screens.RequestServiceScreen
 import com.app.instantmechanic.screens.SplashScreen
 import com.app.instantmechanic.video.VideoCallViewModel
 import com.app.instantmechanic.video.VideoConsultationScreen
+import android.os.Bundle
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import com.app.instantmechanic.BuildConfig
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 
 @Composable
-fun InstantMechanicNavHost() {
+fun InstantMechanicNavHost(
+    notificationMechanicId: String?,
+    onNotificationHandled: () -> Unit
+) {
     val navController = rememberNavController()
     val mechanicViewModel: MechanicViewModel = hiltViewModel()
+    val context = LocalContext.current
+    val analytics = remember(context) {
+        FirebaseAnalytics.getInstance(context.applicationContext)
+    }
 
     NavHost(
         navController = navController,
@@ -40,9 +58,48 @@ fun InstantMechanicNavHost() {
         }
 
         composable(Routes.HOME) {
+            val remoteConfig = remember { FirebaseRemoteConfig.getInstance() }
+            var videoConsultationEnabled by remember { mutableStateOf(true) }
+            LaunchedEffect(remoteConfig) {
+                val settings = FirebaseRemoteConfigSettings.Builder()
+                    .setMinimumFetchIntervalInSeconds(
+                        if (BuildConfig.DEBUG) 0L else 3600L
+                    )
+                    .build()
+
+                remoteConfig.setConfigSettingsAsync(settings)
+                    .addOnCompleteListener {
+                        remoteConfig.setDefaultsAsync(
+                            mapOf("video_consultation_enabled" to true)
+                        ).addOnCompleteListener { defaultsTask ->
+                            if (defaultsTask.isSuccessful) {
+                                videoConsultationEnabled = remoteConfig.getBoolean(
+                                    "video_consultation_enabled"
+                                )
+                            }
+
+                            remoteConfig.fetchAndActivate()
+                                .addOnCompleteListener { fetchTask ->
+                                    if (fetchTask.isSuccessful) {
+                                        videoConsultationEnabled =
+                                            remoteConfig.getBoolean(
+                                                "video_consultation_enabled"
+                                            )
+                                    }
+                                }
+                        }
+                    }
+            }
             MechanicScreen(
                 viewModel = mechanicViewModel,
+                videoConsultationEnabled = videoConsultationEnabled,
                 onMechanicClick = { mechanicId ->
+                    analytics.logEvent(
+                        "mechanic_opened",
+                        Bundle().apply {
+                            putString("mechanic_id", mechanicId)
+                        }
+                    )
                     navController.navigate("details/$mechanicId")
                 },
                 onVideoConsultationClick = {
@@ -127,5 +184,22 @@ fun InstantMechanicNavHost() {
                 )
             }
         }
+    }
+
+    LaunchedEffect(notificationMechanicId) {
+        val mechanicId = notificationMechanicId ?: return@LaunchedEffect
+
+        if (navController.currentDestination?.route == Routes.SPLASH) {
+            navController.navigate(Routes.HOME) {
+                popUpTo(Routes.SPLASH) { inclusive = true }
+                launchSingleTop = true
+            }
+        }
+
+        navController.navigate("details/${Uri.encode(mechanicId)}") {
+            launchSingleTop = true
+        }
+
+        onNotificationHandled()
     }
 }

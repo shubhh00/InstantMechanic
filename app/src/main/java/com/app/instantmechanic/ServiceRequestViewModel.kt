@@ -1,11 +1,14 @@
 package com.app.instantmechanic
 
+import android.os.Bundle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.domain.model.ServiceRequest
 import com.app.domain.repository.ServiceRequestRepository
 import com.app.domain.repository.SubmissionOutcome
 import com.app.instantmechanic.worker.ServiceRequestSyncScheduler
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,7 +35,9 @@ sealed interface ServiceRequestUiState {
 @HiltViewModel
 class ServiceRequestViewModel @Inject constructor(
     private val repository: ServiceRequestRepository,
-    private val syncScheduler: ServiceRequestSyncScheduler
+    private val syncScheduler: ServiceRequestSyncScheduler,
+    private val analytics: FirebaseAnalytics,
+    private val crashlytics: FirebaseCrashlytics
 ) : ViewModel() {
 
     private val _uiState =
@@ -60,12 +65,27 @@ class ServiceRequestViewModel @Inject constructor(
                     syncScheduler.scheduleSync()
                 }
 
+                analytics.logEvent(
+                    "service_request_created",
+                    Bundle().apply {
+                        putString(
+                            "sync_status",
+                            if (queuedForSync) "queued" else "sent"
+                        )
+                    }
+                )
                 _uiState.value = ServiceRequestUiState.Success(
                     queuedForSync = queuedForSync
                 )
             } catch (exception: CancellationException) {
                 throw exception
             } catch (exception: Exception) {
+                _uiState.value = ServiceRequestUiState.Error(
+                    message = exception.message
+                        ?: "Unable to save service request"
+                )
+            } catch (exception: Exception) {
+                crashlytics.recordException(exception)
                 _uiState.value = ServiceRequestUiState.Error(
                     message = exception.message
                         ?: "Unable to save service request"

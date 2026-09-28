@@ -46,7 +46,8 @@ fun MechanicScreen(
     modifier: Modifier = Modifier,
     viewModel: MechanicViewModel,
     onMechanicClick: (String) -> Unit,
-    onVideoConsultationClick: () -> Unit
+    onVideoConsultationClick: () -> Unit,
+    videoConsultationEnabled: Boolean,
 ) {
     val state by viewModel.uiState.collectAsState()
 
@@ -89,11 +90,13 @@ fun MechanicScreen(
                             modifier = Modifier.padding(bottom = 2.dp)
                         )
                     }
-                    item {
-                        VideoConsultationCard(
-                            onStartConsultation =
-                                onVideoConsultationClick
-                        )
+                    if (videoConsultationEnabled) {
+                        item {
+                            VideoConsultationCard(
+                                onStartConsultation =
+                                    onVideoConsultationClick
+                            )
+                        }
                     }
 
 
