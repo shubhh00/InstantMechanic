@@ -4,7 +4,7 @@
 
 **Discover nearby garages, queue service requests offline, and connect with a mechanic over live video.**
 
-An offline-first Android app built to explore production concerns: durable local data, background sync, real-time communication, modular architecture, and measurable performance.
+An offline-first Android app built to explore production concerns: durable local data, background sync, real-time communication, modular architecture, production monitoring, and measurable performance.
 
 <br>
 
@@ -110,6 +110,14 @@ https://github.com/user-attachments/assets/03c49695-fc52-4c10-b7e9-887d6479d9ce
 - Front and rear camera switching
 - Join, leave, error, and remote-user lifecycle handling
 
+### 📈 Production tooling
+
+- **Firebase Analytics:** tracks garage views and service requests, split by whether the request was sent online or queued offline
+- **Crashlytics:** crash reporting, plus non-fatal errors from unexpected submission failures
+- **Remote Config:** turns the video consultation card on or off without a new release
+- **Push notifications:** Firebase Cloud Messaging notifications that open a specific mechanic when tapped
+- **Deep links:** `instantmechanic://mechanic/{id}` opens a mechanic's details page directly
+
 ---
 
 ## Architecture
@@ -118,7 +126,7 @@ The app follows MVVM and Clean Architecture across three Gradle modules:
 
 | Module | Responsibility |
 |:---|:---|
-| **`app`** | Compose UI, navigation, ViewModels, dependency injection, Agora integration, and WorkManager workers |
+| **`app`**    | Compose UI, navigation, ViewModels, dependency injection, Agora integration, WorkManager workers, Firebase Analytics, Crashlytics, Remote Config, and deep-link handling |
 | **`data`** | Room, Firebase, Retrofit, DTOs, mappers, data sources, and repository implementations |
 | **`domain`** | Platform-independent models and repository contracts |
 
@@ -178,6 +186,33 @@ Agora RTC powers the video consultation flow:
 
 ---
 
+## Production tooling
+
+### Analytics
+
+| Event | When it fires | Parameters |
+| --- | --- | --- |
+| `mechanic_opened` | A user opens a garage's details | — |
+| `service_request_created` | A request is saved | `sync_status`: `sent` or `queued` |
+
+`sync_status` separates online submissions from ones queued offline, which shows how often users actually rely on the offline path. Incomplete forms never fire the request event, so the count reflects real requests only.
+
+### Crash reporting
+
+Crashlytics captures crashes automatically. The service-request ViewModel also records unexpected submission exceptions as non-fatal errors, so failures the user recovers from still show up in the dashboard.
+
+### Remote Config
+
+The Boolean flag `video_consultation_enabled` controls whether Home shows the consultation card. Video calls depend on a third-party SDK, so if Agora has an outage or a bad release, the feature can be switched off from the Firebase console in minutes instead of waiting for a new app release.
+
+### Push notifications and deep links
+
+Notifications carry the mechanic's ID as custom data (`mechanic_id`). Tapping one opens that mechanic's details page.
+
+Deep links such as `instantmechanic://mechanic/m_01` go through the same path. `MainActivity` reads the ID and sends it through the same navigation as a notification tap, so both entry points behave identically. The activity is `singleTop`, so a link arriving while the app is already open is delivered through `onNewIntent()` instead of creating a second copy of the screen.
+
+On a cold launch from a notification or link, the details screen collects the Room-backed mechanic list and shows a loading indicator until the data arrives. Before this fix, it briefly showed "Mechanic not found" because the screen rendered before Room had emitted.
+
 ## Performance
 
 ### APK size reduction
@@ -233,6 +268,9 @@ Absolute startup timings depend on the device and build configuration. The perce
 | **Real-time communication** | Agora RTC |
 | **Testing** | JUnit, MockK, kotlinx-coroutines-test |
 | **Build optimization** | R8, Agora Lite SDK |
+| **Monitoring**              | Firebase Crashlytics, Firebase Analytics             |
+| **Remote configuration**    | Firebase Remote Config                               |
+| **Messaging**               | Firebase Cloud Messaging, Android deep links         |
 
 ---
 
@@ -276,7 +314,9 @@ git clone https://github.com/shubhh00/InstantMechanic.git
 
 **2.** Add your Firebase `google-services.json` file under the `app/` directory.
 
-**3.** Add the following values to the root `local.properties` file:
+**3.** In the Firebase console, create a Boolean Remote Config parameter named `video_consultation_enabled` and publish it.
+
+**4.** Add the following values to the root `local.properties` file:
 
 ```properties
 AGORA_APP_ID=your_agora_app_id
@@ -284,14 +324,22 @@ AGORA_RTC_UID=1001
 AGORA_TEMP_TOKEN=your_temporary_token
 ```
 
-**4.** Sync Gradle and run the `app` configuration on an emulator or physical Android device.
+**5.** Sync Gradle and run the `app` configuration on an emulator or physical Android device.
 
 > [!IMPORTANT]
 > `local.properties` must not be committed. Agora temporary tokens expire and should be replaced with server-generated tokens in a production application.
 
 </details>
 
----
+**Try the deep link**
+
+```bash
+adb shell am start -W -a android.intent.action.VIEW -d "instantmechanic://mechanic/m_01" -p com.app.instantmechanic
+```
+
+**Try a push notification**
+
+Copy the device's FCM token from Logcat. In the Firebase console, go to Messaging and send a test message with custom data `mechanic_id = m_01`. Put the app in the background, then tap the notification.
 
 ## Current limitations
 
@@ -301,9 +349,11 @@ AGORA_TEMP_TOKEN=your_temporary_token
 | **Video matching** | Uses a shared demonstration channel without mechanic assignment or production signaling |
 | **Agora authentication** | Uses a temporary development token rather than tokens issued by a secure backend |
 | **Backend** | Firebase is configured as a development data source rather than a production deployment |
+| **Push notifications**   | Sent manually from the Firebase console; no backend stores device tokens or triggers notifications |
+| **Foreground pushes**    | Only FCM's automatic background display is used; notifications aren't shown while the app is open  |
+| **Deep links**           | Custom URL scheme rather than verified HTTPS App Links                                             |
 
 ---
-
 <div align="center">
 
 <sub>Built to explore production Android concerns end to end: modular architecture, offline resilience, real-time communication, and measurable performance.</sub>
